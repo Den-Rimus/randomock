@@ -27,6 +27,8 @@ class Utils {
       if ((max - min) > Integer.MAX_VALUE || min >= max)
          throw new IllegalStateException("Incorrect parameters: min = " + min + ", max = " + max);
 
+      if (min == 0) return random.nextInt(max);
+
       // nextInt is normally exclusive of the top value,
       // so add 1 to make it inclusive
       return random.nextInt((max - min) + 1) + min;
