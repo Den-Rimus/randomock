@@ -1,0 +1,17 @@
+.DS_Store
+
+.idea/*
+!.idea/codeStyleSettings.xml
+
+.gradle
+*.project
+.directory
+build
+
+local.properties
+
+app/manifest-*.txt
+app/app-*.apk
+!app/app-release.apk
+
+*.iml
