@@ -35,20 +35,21 @@ public class RandoMocker {
       if (mGson == null) mGson = new Gson();
 
       if (arraySize == null) {
-         Object instance = processInstance(clazz.getConstructors()[0].newInstance());
+         Object instance = processInstance(clazz.newInstance());
          return mGson.toJson(instance, clazz);
       } else {
          List<Object> collection = new ArrayList<>();
 
          for (int i = 0; i < arraySize; i++) {
-            collection.add(processInstance(clazz.getConstructors()[0].newInstance()));
+            collection.add(processInstance(clazz.newInstance()));
          }
 
          return mGson.toJson(collection);
       }
    }
 
-   private Object processInstance(Object instance) throws IllegalAccessException, InstantiationException, InvocationTargetException {
+   private Object processInstance(Object instance) throws IllegalAccessException, InstantiationException,
+         InvocationTargetException {
       for (Field field : instance.getClass().getDeclaredFields()) {
          if (field.isAnnotationPresent(RandoMock.class)) {
             if (Collection.class.isAssignableFrom(field.getType())) {
@@ -63,7 +64,7 @@ public class RandoMocker {
 
                List<Object> collection = new ArrayList<>();
                for (int i = 0; i < collectionSize; i++) {
-                  collection.add(processInstance(collectionType.getConstructors()[0].newInstance()));
+                  collection.add(processInstance(collectionType.newInstance()));
                }
 
                field.set(instance, collection);
