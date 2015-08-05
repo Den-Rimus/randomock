@@ -2,6 +2,9 @@ package me.den.randomocker;
 
 import com.google.gson.Gson;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+
 import android.support.annotation.Nullable;
 
 import java.lang.reflect.Field;
@@ -22,12 +25,13 @@ public class RandoMocker {
 
    private Gson mGson;
 
-   public String fetch(Class<?> clazz) throws IllegalAccessException, InstantiationException, InvocationTargetException {
+   public String fetch(Class<?> clazz) throws IllegalAccessException, InstantiationException, InvocationTargetException,
+         JSONException {
       return fetch(clazz, null);
    }
 
    public String fetch(Class<?> clazz, @Nullable Integer arraySize) throws IllegalAccessException, InstantiationException,
-         InvocationTargetException {
+         InvocationTargetException, JSONException {
       if (!clazz.isAnnotationPresent(RandoMock.class))
          throw new IllegalArgumentException(clazz.getCanonicalName() + " lacks @RandoMock annotation!");
 
@@ -49,7 +53,7 @@ public class RandoMocker {
    }
 
    private Object processInstance(Object instance) throws IllegalAccessException, InstantiationException,
-         InvocationTargetException {
+         InvocationTargetException, JSONException {
       for (Field field : instance.getClass().getDeclaredFields()) {
          if (field.isAnnotationPresent(RandoMock.class)) {
             if (Collection.class.isAssignableFrom(field.getType())) {
@@ -119,17 +123,21 @@ public class RandoMocker {
       field.setInt(instance, result);
    }
 
-   private void processStringField(Field field, Object instance) throws IllegalAccessException {
+   private void processStringField(Field field, Object instance) throws IllegalAccessException, JSONException {
       Utils.patchAccessibility(field);
 
       RandoMock annotation = field.getAnnotation(RandoMock.class);
 
-      String[] defaultKit = annotation.stringKit();
+      String[] stringKit = annotation.stringKit();
+      String parselableStringKit = annotation.parselableStringKit();
       String result;
-      if (defaultKit.length == 0) {
+      if (stringKit.length == 0) {
          result = new NonsenseGenerator(mRandom).makeHeadline();
+      } else if (parselableStringKit.isEmpty()) {
+         JSONArray jsonKit = new JSONArray(parselableStringKit);
+         result = jsonKit.getString(mRandom.nextInt(parselableStringKit.length()));
       } else {
-         result = defaultKit[mRandom.nextInt(defaultKit.length)];
+         result = stringKit[mRandom.nextInt(stringKit.length)];
       }
 
       field.set(instance, result);

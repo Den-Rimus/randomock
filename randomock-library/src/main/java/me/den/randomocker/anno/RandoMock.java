@@ -22,6 +22,8 @@ public @interface RandoMock {
 
    String[] stringKit() default { };
 
+   String parselableStringKit() default "";
+
    long minLong() default 1L;
 
    long maxLong() default 2147471999L;
