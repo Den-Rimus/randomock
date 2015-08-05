@@ -10,7 +10,7 @@ import java.lang.annotation.Target;
  * TODO
  * </b> : write docs
  */
-@Target({ ElementType.FIELD, ElementType.TYPE })
+@Target( { ElementType.FIELD, ElementType.TYPE })
 @Retention(RetentionPolicy.RUNTIME)
 public @interface RandoMock {
 
@@ -36,7 +36,7 @@ public @interface RandoMock {
 
    double[] doubleKit() default { };
 
-   int collectionSize() default 7;
+   int collectionSize() default 0;
 
    int collectionSizeMin() default 1;
 

@@ -57,21 +57,7 @@ public class RandoMocker {
       for (Field field : instance.getClass().getDeclaredFields()) {
          if (field.isAnnotationPresent(RandoMock.class)) {
             if (Collection.class.isAssignableFrom(field.getType())) {
-               Utils.patchAccessibility(field);
-
-               RandoMock annotation = field.getAnnotation(RandoMock.class);
-
-               int collectionSize = annotation.collectionSize();
-
-               ParameterizedType parameterizedCollectionType = (ParameterizedType) field.getGenericType();
-               Class<?> collectionType = (Class<?>) parameterizedCollectionType.getActualTypeArguments()[0];
-
-               List<Object> collection = new ArrayList<>();
-               for (int i = 0; i < collectionSize; i++) {
-                  collection.add(processInstance(collectionType.newInstance()));
-               }
-
-               field.set(instance, collection);
+               processColletionField(field, instance);
             } else {
                switch (field.getType().toString()) {
                   case "int": {
@@ -99,6 +85,30 @@ public class RandoMocker {
       }
 
       return instance;
+   }
+
+   private void processColletionField(Field field, Object instance) throws IllegalAccessException, InstantiationException,
+         InvocationTargetException, JSONException {
+      Utils.patchAccessibility(field);
+
+      RandoMock annotation = field.getAnnotation(RandoMock.class);
+
+      int collectionSize = annotation.collectionSize();
+
+      if (collectionSize == 0) {
+         int min = annotation.collectionSizeMin(), max = annotation.collectionSizeMax();
+         collectionSize = Utils.getRandomInt(mRandom, min, max);
+      }
+
+      ParameterizedType parameterizedCollectionType = (ParameterizedType) field.getGenericType();
+      Class<?> collectionType = (Class<?>) parameterizedCollectionType.getActualTypeArguments()[0];
+
+      List<Object> collection = new ArrayList<>();
+      for (int i = 0; i < collectionSize; i++) {
+         collection.add(processInstance(collectionType.newInstance()));
+      }
+
+      field.set(instance, collection);
    }
 
    private void processIntField(Field field, Object instance) throws IllegalAccessException {
