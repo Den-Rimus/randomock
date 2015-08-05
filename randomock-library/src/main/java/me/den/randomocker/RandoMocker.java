@@ -57,7 +57,9 @@ public class RandoMocker {
       for (Field field : instance.getClass().getDeclaredFields()) {
          if (field.isAnnotationPresent(RandoMock.class)) {
             if (Collection.class.isAssignableFrom(field.getType())) {
-               processColletionField(field, instance);
+               processCollectionField(field, instance);
+            } else if (field.getType().isAnnotationPresent(RandoMock.class)) {
+               processMockableClassField(field, instance);
             } else {
                switch (field.getType().toString()) {
                   case "int": {
@@ -87,7 +89,20 @@ public class RandoMocker {
       return instance;
    }
 
-   private void processColletionField(Field field, Object instance) throws IllegalAccessException, InstantiationException,
+   private void processMockableClassField(Field field, Object instance) throws IllegalAccessException, InstantiationException,
+         InvocationTargetException, JSONException {
+      Utils.patchAccessibility(field);
+      RandoMock annotation = field.getAnnotation(RandoMock.class);
+
+      // TODO : nullable?
+
+      Object mockableTypeInstance = field.getType().newInstance();
+      processInstance(mockableTypeInstance);
+
+      field.set(instance, mockableTypeInstance);
+   }
+
+   private void processCollectionField(Field field, Object instance) throws IllegalAccessException, InstantiationException,
          InvocationTargetException, JSONException {
       Utils.patchAccessibility(field);
 
@@ -141,9 +156,10 @@ public class RandoMocker {
       String[] stringKit = annotation.stringKit();
       String parselableStringKit = annotation.parselableStringKit();
       String result;
+
       if (stringKit.length == 0) {
          result = new NonsenseGenerator(mRandom).makeHeadline();
-      } else if (parselableStringKit.isEmpty()) {
+      } else if (!parselableStringKit.isEmpty()) {
          JSONArray jsonKit = new JSONArray(parselableStringKit);
          result = jsonKit.getString(mRandom.nextInt(parselableStringKit.length()));
       } else {
