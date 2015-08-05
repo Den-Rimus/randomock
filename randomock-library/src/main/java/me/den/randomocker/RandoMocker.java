@@ -5,7 +5,9 @@ import com.google.gson.Gson;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.ParameterizedType;
-import java.util.AbstractList;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import java.util.Random;
 
 import me.den.randomocker.anno.RandoMock;
@@ -30,11 +32,22 @@ public class RandoMocker {
    private Object processInstance(Object instance) throws IllegalAccessException, InstantiationException, InvocationTargetException {
       for (Field field : instance.getClass().getDeclaredFields()) {
          if (field.isAnnotationPresent(RandoMock.class)) {
-            if (field.getClass().isAssignableFrom(AbstractList.class)) {
-               // TODO : deal with field that is collection of objects
+            if (Collection.class.isAssignableFrom(field.getType())) {
+               Utils.patchAccessibility(field);
+
+               RandoMock annotation = field.getAnnotation(RandoMock.class);
+
+               int collectionSize = annotation.collectionSize();
 
                ParameterizedType parameterizedCollectionType = (ParameterizedType) field.getGenericType();
                Class<?> collectionType = (Class<?>) parameterizedCollectionType.getActualTypeArguments()[0];
+
+               List<Object> collection = new ArrayList<>();
+               for (int i = 0; i < collectionSize; i++) {
+                  collection.add(processInstance(collectionType.getConstructors()[0].newInstance()));
+               }
+
+               field.set(instance, collection);
             } else {
                switch (field.getType().toString()) {
                   case "int": {
