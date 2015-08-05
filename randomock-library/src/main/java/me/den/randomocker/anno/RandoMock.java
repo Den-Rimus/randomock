@@ -41,4 +41,8 @@ public @interface RandoMock {
    int collectionSizeMin() default 1;
 
    int collectionSizeMax() default 8;
+
+   boolean nullable() default false;
+
+   float nullableChance() default 0.22F;
 }

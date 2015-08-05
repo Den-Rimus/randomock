@@ -152,6 +152,11 @@ public class RandoMocker {
       Utils.patchAccessibility(field);
 
       RandoMock annotation = field.getAnnotation(RandoMock.class);
+      boolean nullable = annotation.nullable();
+      if (nullable && Utils.throwCoin(mRandom, annotation.nullableChance())) {
+         field.set(instance, null);
+         return;
+      }
 
       String[] stringKit = annotation.stringKit();
       String parselableStringKit = annotation.parselableStringKit();

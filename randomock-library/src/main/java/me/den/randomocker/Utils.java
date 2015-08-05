@@ -85,4 +85,8 @@ class Utils {
       } while (bits - val + (n - 1) < 0L);
       return val;
    }
+
+   public static boolean throwCoin(Random random, float chance) {
+      return chance >= random.nextFloat();
+   }
 }
