@@ -2,6 +2,8 @@ package me.den.randomocker;
 
 import com.google.gson.Gson;
 
+import android.support.annotation.Nullable;
+
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.ParameterizedType;
@@ -18,15 +20,32 @@ public class RandoMocker {
 
    private Random mRandom = null;
 
+   private Gson mGson;
+
    public String fetch(Class<?> clazz) throws IllegalAccessException, InstantiationException, InvocationTargetException {
+      return fetch(clazz, null);
+   }
+
+   public String fetch(Class<?> clazz, @Nullable Integer arraySize) throws IllegalAccessException, InstantiationException,
+         InvocationTargetException {
       if (!clazz.isAnnotationPresent(RandoMock.class))
          throw new IllegalArgumentException(clazz.getCanonicalName() + " lacks @RandoMock annotation!");
 
       if (mRandom == null) mRandom = new Random();
+      if (mGson == null) mGson = new Gson();
 
-      Object instance = processInstance(clazz.getConstructors()[0].newInstance());
+      if (arraySize == null) {
+         Object instance = processInstance(clazz.getConstructors()[0].newInstance());
+         return mGson.toJson(instance, clazz);
+      } else {
+         List<Object> collection = new ArrayList<>();
 
-      return new Gson().toJson(instance, clazz);
+         for (int i = 0; i < arraySize; i++) {
+            collection.add(processInstance(clazz.getConstructors()[0].newInstance()));
+         }
+
+         return mGson.toJson(collection);
+      }
    }
 
    private Object processInstance(Object instance) throws IllegalAccessException, InstantiationException, InvocationTargetException {
@@ -165,6 +184,10 @@ public class RandoMocker {
       mRandom = random;
    }
 
+   void setGson(Gson gson) {
+      mGson = gson;
+   }
+
    public static class Builder {
 
       private RandoMocker mInstance;
@@ -180,6 +203,11 @@ public class RandoMocker {
 
       public Builder skipUnknownField(boolean skip) {
          mInstance.setSilentlySkipUnknownField(skip);
+         return this;
+      }
+
+      public Builder withGson(Gson gson) {
+         mInstance.setGson(gson);
          return this;
       }
 

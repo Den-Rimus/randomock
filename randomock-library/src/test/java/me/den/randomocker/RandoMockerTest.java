@@ -23,6 +23,12 @@ public class RandoMockerTest {
       if (serializedResult != null) throw new Exception("This passes: " + serializedResult);
    }
 
+   @Test()
+   public void testFetchMultiple() throws Exception {
+      String serializedResult = mRandoMocker.fetch(TestCat.class, 7);
+      if (serializedResult != null) throw new Exception("This passes: " + serializedResult);
+   }
+
 //   @Test
 //   public void testFetchMinInt() throws Exception {
 //      assertTrue(new RandoMocker().fetch(TestCat.class).startsWith("legsNumber: "));
