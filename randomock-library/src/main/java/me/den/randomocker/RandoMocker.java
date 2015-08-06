@@ -162,11 +162,11 @@ public class RandoMocker {
       String parselableStringKit = annotation.parselableStringKit();
       String result;
 
-      if (stringKit.length == 0) {
+      if (stringKit.length == 0 && parselableStringKit.isEmpty()) {
          result = new NonsenseGenerator(mRandom).makeHeadline();
       } else if (!parselableStringKit.isEmpty()) {
          JSONArray jsonKit = new JSONArray(parselableStringKit);
-         result = jsonKit.getString(mRandom.nextInt(parselableStringKit.length()));
+         result = jsonKit.getString(mRandom.nextInt(jsonKit.length()));
       } else {
          result = stringKit[mRandom.nextInt(stringKit.length)];
       }
