@@ -1,6 +1,11 @@
 package me.den.randomocker;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+
 import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 class Utils {
@@ -90,5 +95,21 @@ class Utils {
 
    public static boolean throwCoin(Random random, float chance) {
       return chance >= random.nextFloat();
+   }
+
+   public static String[] jsonToStringArray(String json) {
+      if (json.isEmpty()) return new String[] { };
+
+      try {
+         JSONArray jArray = new JSONArray(json);
+         List<String> list = new ArrayList<>();
+         for (int i = 0; i < jArray.length(); i++) {
+            list.add(jArray.getString(i));
+         }
+
+         return list.toArray(new String[list.size()]);
+      } catch (JSONException e) {
+         return new String[] { };
+      }
    }
 }

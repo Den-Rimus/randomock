@@ -2,7 +2,6 @@ package me.den.randomocker;
 
 import com.google.gson.Gson;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 
 import android.support.annotation.Nullable;
@@ -96,7 +95,11 @@ public class RandoMocker {
       Utils.patchAccessibility(field);
       RandoMock annotation = field.getAnnotation(RandoMock.class);
 
-      // TODO : nullable?
+      boolean nullable = annotation.nullable();
+      if (nullable && Utils.throwCoin(mRandom, annotation.nullableChance())) {
+         field.set(instance, null);
+         return;
+      }
 
       Object mockableTypeInstance = field.getType().newInstance();
       processInstance(mockableTypeInstance);
@@ -117,10 +120,19 @@ public class RandoMocker {
          collectionSize = Utils.getRandomInt(mRandom, min, max);
       }
 
+      String[] stringKit = null;
+
+      if (annotation.stringKit().length != 0 || !annotation.parselableStringKit().isEmpty()) {
+         stringKit = annotation.stringKit();
+         if (stringKit.length == 0) {
+            stringKit = Utils.jsonToStringArray(annotation.parselableStringKit());
+         }
+      }
+
       ParameterizedType parameterizedCollectionType = (ParameterizedType) field.getGenericType();
       Class<?> collectionType = (Class<?>) parameterizedCollectionType.getActualTypeArguments()[0];
 
-      // TODO : below is a dirty workaround for current projet. Must find another way to work with realm or even drop it from lib
+      // TODO : below is a dirty workaround for current project. Must find another way to work with realm or even drop it from lib
       if (field.getType().toString().equals("class io.realm.RealmList")) {
          // custom case to handle RealmList collection type:
          RealmList<RealmObject> collection = new RealmList<>();
@@ -132,7 +144,11 @@ public class RandoMocker {
       } else {
          List<Object> collection = new ArrayList<>();
          for (int i = 0; i < collectionSize; i++) {
-            collection.add(processInstance(collectionType.newInstance()));
+            if (collectionType.toString().equals("class java.lang.String") && stringKit != null && stringKit.length != 0) {
+               collection.add(stringKit[Utils.getRandomInt(mRandom, 0, stringKit.length)]);
+            } else {
+               collection.add(processInstance(collectionType.newInstance()));
+            }
          }
 
          field.set(instance, collection);
@@ -172,14 +188,14 @@ public class RandoMocker {
       }
 
       String[] stringKit = annotation.stringKit();
-      String parselableStringKit = annotation.parselableStringKit();
+      if (stringKit.length == 0) {
+         stringKit = Utils.jsonToStringArray(annotation.parselableStringKit());
+      }
+
       String result;
 
-      if (stringKit.length == 0 && parselableStringKit.isEmpty()) {
+      if (stringKit.length == 0) {
          result = new NonsenseGenerator(mRandom).makeHeadline();
-      } else if (!parselableStringKit.isEmpty()) {
-         JSONArray jsonKit = new JSONArray(parselableStringKit);
-         result = jsonKit.getString(mRandom.nextInt(jsonKit.length()));
       } else {
          result = stringKit[mRandom.nextInt(stringKit.length)];
       }
