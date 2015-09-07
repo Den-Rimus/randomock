@@ -14,8 +14,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Random;
 
-import io.realm.RealmList;
-import io.realm.RealmObject;
 import me.den.randomocker.anno.RandoMock;
 
 public class RandoMocker {
@@ -132,27 +130,16 @@ public class RandoMocker {
       ParameterizedType parameterizedCollectionType = (ParameterizedType) field.getGenericType();
       Class<?> collectionType = (Class<?>) parameterizedCollectionType.getActualTypeArguments()[0];
 
-      // TODO : below is a dirty workaround for current project. Must find another way to work with realm or even drop it from lib
-      if (field.getType().toString().equals("class io.realm.RealmList")) {
-         // custom case to handle RealmList collection type:
-         RealmList<RealmObject> collection = new RealmList<>();
-         for (int i = 0; i < collectionSize; i++) {
-            collection.add((RealmObject) processInstance(collectionType.newInstance()));
+      List<Object> collection = new ArrayList<>();
+      for (int i = 0; i < collectionSize; i++) {
+         if (collectionType.toString().equals("class java.lang.String") && stringKit != null && stringKit.length != 0) {
+            collection.add(stringKit[Utils.getRandomInt(mRandom, 0, stringKit.length)]);
+         } else {
+            collection.add(processInstance(collectionType.newInstance()));
          }
-
-         field.set(instance, collection);
-      } else {
-         List<Object> collection = new ArrayList<>();
-         for (int i = 0; i < collectionSize; i++) {
-            if (collectionType.toString().equals("class java.lang.String") && stringKit != null && stringKit.length != 0) {
-               collection.add(stringKit[Utils.getRandomInt(mRandom, 0, stringKit.length)]);
-            } else {
-               collection.add(processInstance(collectionType.newInstance()));
-            }
-         }
-
-         field.set(instance, collection);
       }
+
+      field.set(instance, collection);
    }
 
    private void processIntField(Field field, Object instance) throws IllegalAccessException {
