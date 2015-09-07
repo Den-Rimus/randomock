@@ -19,14 +19,14 @@ public class RandoMockerTest {
    //   @Test(expected = Exception.class)
    @Test()
    public void testFetch() throws Exception {
-      String serializedResult = mRandoMocker.fetch(TestCat.class);
-      if (serializedResult != null) throw new Exception("This passes: " + serializedResult);
+      String deSerializedResult = mRandoMocker.fetch(TestCat.class);
+      if (deSerializedResult != null) throw new Exception("This passes: " + deSerializedResult);
    }
 
    @Test()
    public void testFetchMultiple() throws Exception {
-      String serializedResult = mRandoMocker.fetch(TestCat.class, 7);
-      if (serializedResult != null) throw new Exception("This passes: " + serializedResult);
+      String deSerializedResult = mRandoMocker.fetch(TestCat.class, 7);
+      if (deSerializedResult != null) throw new Exception("This passes: " + deSerializedResult);
    }
 
 //   @Test
